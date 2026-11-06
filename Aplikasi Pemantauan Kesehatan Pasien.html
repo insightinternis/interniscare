@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="color-scheme" content="light dark">
+    <meta name="theme-color" content="#0284c7">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Internis Care">
+    <title>Aplikasi Pemantauan Kesehatan Pasien</title>
+    <!-- Tailwind CSS -->
+    <script data-keep>
+        (function () {
+            var t = null;
+            try { t = localStorage.getItem('medi_theme'); } catch (e) {}
+            if (!t) t = (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+            document.documentElement.classList.toggle('dark', t === 'dark');
+        })();
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+        <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- html2pdf library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <script data-keep>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        medical: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#075985',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style data-keep>
+        /* CSS Khusus Cetak / Print PDF */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            .print-container {
+                box-shadow: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 100% !important;
+            }
+            table {
+                font-size: 10px !important;
+            }
+            th, td {
+                padding: 4px 6px !important;
+            }
+        }
+
+        /* ===== Mode Gelap ===== */
+        .icon-sun { display: none; }
+        html.dark .icon-sun { display: inline-block; }
+        html.dark .icon-moon { display: none; }
+        .theme-btn { background:#f1f5f9; color:#334155; border:1px solid #e2e8f0; }
+        @media screen {
+            html.dark { color-scheme: dark; }
+            html.dark body { background:#0b1220; color:#e2e8f0; }
+            html.dark .bg-white { background-color:#111a2e; }
+            html.dark .bg-slate-50 { background-color:#0f172a; }
+            html.dark .bg-slate-100 { background-color:#1a2540; }
+            html.dark .bg-blue-100 { background-color:#0c3a5a; }
+            html.dark .hover\:bg-slate-50:hover { background-color:#16213a; }
+            html.dark .hover\:bg-slate-100:hover { background-color:#1a2540; }
+            html.dark .border-slate-100, html.dark .border-slate-200, html.dark .border-slate-300 { border-color:#263450; }
+            html.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) { border-color:#1f2b45; }
+            html.dark .text-slate-900, html.dark .text-slate-800 { color:#f1f5f9; }
+            html.dark .text-slate-700 { color:#e2e8f0; }
+            html.dark .text-slate-600 { color:#cbd5e1; }
+            html.dark .text-slate-500 { color:#94a3b8; }
+            html.dark .text-slate-400 { color:#7d8ba3; }
+            html.dark .text-slate-300 { color:#5b6985; }
+            html.dark .text-medical-600 { color:#38bdf8; }
+            html.dark .bg-emerald-50 { background-color:rgba(16,185,129,.12); }
+            html.dark .bg-amber-50 { background-color:rgba(245,158,11,.12); }
+            html.dark .bg-rose-50 { background-color:rgba(244,63,94,.12); }
+            html.dark .border-emerald-100, html.dark .border-emerald-200 { border-color:rgba(16,185,129,.35); }
+            html.dark .border-amber-100, html.dark .border-amber-200 { border-color:rgba(245,158,11,.35); }
+            html.dark .border-rose-100, html.dark .border-rose-200 { border-color:rgba(244,63,94,.35); }
+            html.dark .text-emerald-600, html.dark .text-emerald-700 { color:#6ee7b7; }
+            html.dark .text-amber-600, html.dark .text-amber-700 { color:#fcd34d; }
+            html.dark .text-rose-600, html.dark .text-rose-700 { color:#fda4af; }
+            html.dark .hover\:bg-emerald-100:hover { background-color:rgba(16,185,129,.22); }
+            html.dark .hover\:bg-rose-100:hover { background-color:rgba(244,63,94,.22); }
+            html.dark .bg-emerald-100 { background-color:rgba(16,185,129,.2); }
+            html.dark .bg-amber-100 { background-color:rgba(245,158,11,.2); }
+            html.dark .bg-rose-100 { background-color:rgba(244,63,94,.2); }
+            html.dark .text-emerald-800 { color:#a7f3d0; }
+            html.dark .text-amber-800 { color:#fde68a; }
+            html.dark .text-rose-800 { color:#fecdd3; }
+            html.dark .text-blue-600 { color:#7dd3fc; }
+            html.dark .hover\:bg-blue-50:hover { background-color:rgba(56,189,248,.15); }
+            html.dark .hover\:bg-rose-50:hover { background-color:rgba(244,63,94,.15); }
+            html.dark input, html.dark textarea { background-color:#0b1220; color:#e2e8f0; border-color:#2b3b5c; }
+            html.dark input::placeholder, html.dark textarea::placeholder { color:#64748b; }
+            html.dark .custom-scrollbar::-webkit-scrollbar-track { background:#0f172a; }
+            html.dark .custom-scrollbar::-webkit-scrollbar-thumb { background:#334564; }
+            html.dark #toast { border:1px solid #334564; }
+            html.dark .theme-btn { background:#1a2540; color:#fcd34d; border-color:#263450; }
+        }
+        .theme-btn { transition: background .2s; }
+        .theme-btn:hover { filter: brightness(.96); }
+        /* Custom scrollbar for horizontal table */
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Top Navigation Bar -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-medical-500 text-white p-2.5 rounded-xl shadow-md">
+                    <i class="fa-solid fa-heart-pulse text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg text-slate-900 leading-tight">Internis Care</h1>
+                    <p class="text-xs text-slate-500">Sistem Pemantauan Hasil Lab & Kesehatan Pasien</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-2">
+                <button id="installBtn" onclick="openInstall()" class="theme-btn px-3 py-2 rounded-lg text-sm font-medium flex items-center space-x-2" title="Pasang aplikasi di HP" aria-label="Pasang aplikasi di HP">
+                    <i class="fa-solid fa-download"></i>
+                    <span class="hidden sm:inline">Pasang di HP</span>
+                </button>
+                <button id="themeToggle" onclick="toggleTheme()" class="theme-btn px-3 py-2 rounded-lg text-sm font-medium flex items-center space-x-2" title="Ganti mode gelap / terang" aria-label="Ganti mode gelap atau terang">
+                    <span class="icon-moon"><i class="fa-solid fa-moon"></i></span>
+                    <span class="icon-sun"><i class="fa-solid fa-sun"></i></span>
+                    <span id="themeLabel" class="hidden sm:inline">Gelap</span>
+                </button>
+                <button onclick="openModalForm()" class="bg-medical-600 hover:bg-medical-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-2 shadow-sm transition">
+                    <i class="fa-solid fa-plus"></i>
+                    <span class="hidden sm:inline">Tambah Pemeriksaan</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- Patient Header / Filter Profile -->
+        <div class="bg-white rounded-2xl p-5 mb-6 border border-slate-200 shadow-sm no-print">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-blue-100 text-medical-600 rounded-full flex items-center justify-center font-bold text-lg">
+                        <i class="fa-solid fa-user-doctor"></i>
+                    </div>
+                    <div>
+                        <span class="text-xs font-semibold uppercase tracking-wider text-medical-600">Profil Pasien Aktif</span>
+                        <div class="flex items-center space-x-3">
+                            <input type="text" id="filterNama" oninput="filterData()" placeholder="Nama Pasien (Filter/Search)..." 
+                                class="font-bold text-xl text-slate-800 bg-transparent border-b border-dashed border-slate-300 focus:border-medical-500 focus:outline-none px-1 py-0.5">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Summary Badges -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div class="bg-slate-50 border border-slate-100 rounded-xl p-3 text-center">
+                        <span class="text-xs text-slate-500 block">Total Catatan</span>
+                        <span id="statTotal" class="text-lg font-bold text-slate-800">0</span>
+                    </div>
+                    <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-3 text-center">
+                        <span class="text-xs text-emerald-600 block">Normal</span>
+                        <span id="statNormal" class="text-lg font-bold text-emerald-700">0</span>
+                    </div>
+                    <div class="bg-amber-50 border border-amber-100 rounded-xl p-3 text-center">
+                        <span class="text-xs text-amber-600 block">Perhatian</span>
+                        <span id="statWaspada" class="text-lg font-bold text-amber-700">0</span>
+                    </div>
+                    <div class="bg-rose-50 border border-rose-100 rounded-xl p-3 text-center">
+                        <span class="text-xs text-rose-600 block">Tinggi / Abnormal</span>
+                        <span id="statTinggi" class="text-lg font-bold text-rose-700">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Tools Bar -->
+        <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 mb-4 no-print">
+            <div class="flex items-center space-x-2 bg-white px-3 py-2 rounded-lg border border-slate-200">
+                <i class="fa-solid fa-magnifying-glass text-slate-400 text-sm"></i>
+                <input type="date" id="filterTanggal" onchange="filterData()" class="text-sm bg-transparent border-none focus:outline-none text-slate-700">
+                <button onclick="resetFilter()" class="text-xs text-slate-400 hover:text-slate-600 ml-2" title="Reset Filter">
+                    <i class="fa-solid fa-xmark"></i> Reset
+                </button>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+                <button onclick="exportPDF()" class="flex-1 sm:flex-none bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-3 py-2 rounded-lg text-sm font-medium transition flex items-center justify-center space-x-1.5">
+                    <i class="fa-solid fa-file-pdf"></i>
+                    <span>Cetak / PDF</span>
+                </button>
+                <button onclick="kirimWhatsApp()" class="flex-1 sm:flex-none bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm font-medium shadow-sm transition flex items-center justify-center space-x-1.5">
+                    <i class="fa-brands fa-whatsapp text-lg"></i>
+                    <span>Kirim WA</span>
+                </button>
+                <button onclick="openDeleteAll()" class="flex-1 sm:flex-none bg-rose-600 hover:bg-rose-700 text-white px-3 py-2 rounded-lg text-sm font-medium shadow-sm transition flex items-center justify-center space-x-1.5">
+                    <i class="fa-solid fa-trash-can"></i>
+                    <span>Hapus Semua</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Printable Document Area -->
+        <div id="printArea" class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden print-container">
+            
+            <!-- Document Print Header (Only visible on Export/PDF/Print) -->
+            <div class="hidden print:block p-6 border-b border-slate-200">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h1 class="text-2xl font-bold text-slate-900">LAPORAN PEMANTAUAN KESEHATAN PASIEN</h1>
+                        <p class="text-xs text-slate-500">Dicetak pada: <span id="printDate"></span></p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm font-bold text-medical-600">Internis Care</p>
+                        <p class="text-[10px] text-slate-500">Supervisi medis dr. Puguh Widagdo, SpPD - FINASIM</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table Container -->
+            <div class="overflow-x-auto custom-scrollbar">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 border-b border-slate-200 text-slate-700 font-semibold uppercase tracking-wider">
+                            <th class="p-3 text-center w-10">No</th>
+                            <th class="p-3 min-w-[100px]">Tgl & Pasien</th>
+                            <th class="p-3 text-center">GDP <span class="block text-[9px] font-normal text-slate-400">70-100 mg/dL</span></th>
+                            <th class="p-3 text-center">GD2JAMPP <span class="block text-[9px] font-normal text-slate-400">&lt;140 mg/dL</span></th>
+                            <th class="p-3 text-center">GDAcak <span class="block text-[9px] font-normal text-slate-400">&lt;200 mg/dL</span></th>
+                            <th class="p-3 text-center">HbA1c <span class="block text-[9px] font-normal text-slate-400">&lt;5.7 %</span></th>
+                            <th class="p-3 text-center">KOLESTEROL <span class="block text-[9px] font-normal text-slate-400">&lt;200 mg/dL</span></th>
+                            <th class="p-3 text-center">LDL <span class="block text-[9px] font-normal text-slate-400">&lt;100 mg/dL</span></th>
+                            <th class="p-3 text-center">TG <span class="block text-[9px] font-normal text-slate-400">&lt;150 mg/dL</span></th>
+                            <th class="p-3 text-center">ASAM URAT <span class="block text-[9px] font-normal text-slate-400">3.5-7.0 mg/dL</span></th>
+                            <th class="p-3 text-center">BUN <span class="block text-[9px] font-normal text-slate-400">7-20 mg/dL</span></th>
+                            <th class="p-3 text-center">SERUM KREATININ <span class="block text-[9px] font-normal text-slate-400">0.6-1.2 mg/dL</span></th>
+                            <th class="p-3 min-w-[180px]">OBAT YANG DIKONSUMSI (Oral / Insulin)</th>
+                            <th class="p-3 text-center no-print min-w-[80px]">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-slate-100">
+                        <!-- Dynamic Rows Generated by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden p-12 text-center">
+                <div class="w-16 h-16 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fa-solid fa-notes-medical text-2xl"></i>
+                </div>
+                <h3 class="text-slate-700 font-semibold mb-1">Belum Ada Data Pemeriksaan</h3>
+                <p class="text-xs text-slate-400 mb-4">Klik tombol di bawah untuk menambahkan catatan hasil lab medis pasien.</p>
+                <button onclick="openModalForm()" class="bg-medical-600 hover:bg-medical-700 text-white px-4 py-2 rounded-lg text-xs font-medium inline-flex items-center space-x-1.5">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Tambah Data Pertama</span>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Kredit Supervisi -->
+    <footer class="no-print border-t border-slate-200 py-4 px-4 text-center">
+        <p class="text-xs text-slate-500">Supervisi medis <span class="font-semibold text-slate-700">dr. Puguh Widagdo, SpPD - FINASIM</span></p>
+    </footer>
+
+    <!-- Modal Form (Create / Edit) -->
+    <div id="modalForm" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 overflow-y-auto no-print">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-3xl overflow-hidden my-8">
+            <div class="bg-slate-900 text-white p-4 sm:p-5 flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-file-medical text-medical-500 text-xl"></i>
+                    <h3 id="modalTitle" class="font-bold text-lg">Input Data Hasil Pemeriksaan</h3>
+                </div>
+                <button onclick="closeModalForm()" class="text-slate-400 hover:text-white transition">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <form id="labForm" onsubmit="saveData(event)" class="p-4 sm:p-6 space-y-4">
+                <input type="hidden" id="editIndex" value="-1">
+
+                <!-- Identitas Pasien -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Identitas Pasien & Tanggal</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1">Nama Pasien *</label>
+                            <input type="text" id="inputNama" required class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-medical-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1">Usia / Jenis Kelamin</label>
+                            <input type="text" id="inputInfoPasien" placeholder="Misal: 45 th / L" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-medical-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1">Tanggal Pemeriksaan *</label>
+                            <input type="date" id="inputTgl" required class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-medical-500 focus:outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Parameter Laboratorium -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Hasil Laboratorium Medis</h4>
+                    
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-700">GDP <span class="text-slate-400 font-normal">(70-100)</span></label>
+                            <div class="relative mt-1">
+                                <input type="number" step="any" id="inputGDP" placeholder="mg/dL" class="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-medical-500 focus:outline-none">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-700">GD2JAMPP <span class="text-slate-400 font-normal">(&lt;140)</span></label>
+                            <div class="relative mt-1">
+                                <input type="number" step="any" id="inputGD2JAMPP" placeholder="mg/dL" class="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-medical-500 focus:outline-none">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-700">GDAcak <span class="text-slate-400 font-normal">(&lt;200)</span></label>
+                            <div class="relative mt-1">
+                                <input type="number" step="any" id="inputGDAcak" placeholder="mg/dL" class="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-medical-500 focus:outline-none">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-700">HbA1c <span class="text-slate-400 font-normal">(&lt;5.7%)</span></label>
+                            <div class="relative mt-1">
+                                <input type="number" step="any" id="inputHbA1c" placeholder="%" class="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-medical-500 focus:outline-none">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-700">KOLESTEROL Total <span class="text-slate-400 font-normal">(&lt;200)</span></label>
+                            <div class="relative mt-1">
+                                <input type="number" step="any" id="inputKolesterol" placeholder="mg/dL" class="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-medical-500 focus:outline-none">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-700">LDL <span class="text-slate-400 font-normal">(&lt;100)</span></label>
+                            <div class="relative mt-1">
+                                <input type="number" step="any" id="inputLDL" placeholder="mg/dL" class="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-medical-500 focus:outline-none">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-700">TG (Trigliserida) <span class="text-slate-400 font-normal">(&lt;150)</span></label>
+                            <div class="relative mt-1">
+                                <input type="number" step="any" id="inputTG" placeholder="mg/dL" class="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-medical-500 focus:outline-none">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-700">ASAM URAT <span class="text-slate-400 font-normal">(3.5-7.0)</span></label>
+                            <div class="relative mt-1">
+                                <input type="number" step="any" id="inputAsamUrat" placeholder="mg/dL" class="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-medical-500 focus:outline-none">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-700">BUN <span class="text-slate-400 font-normal">(7-20)</span></label>
+                            <div class="relative mt-1">
+                                <input type="number" step="any" id="inputBUN" placeholder="mg/dL" class="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-medical-500 focus:outline-none">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-700">SERUM KREATININ <span class="text-slate-400 font-normal">(0.6-1.2)</span></label>
+                            <div class="relative mt-1">
+                                <input type="number" step="any" id="inputKreatinin" placeholder="mg/dL" class="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-medical-500 focus:outline-none">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Obat yang dikonsumsi -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">OBAT YANG DI KONSUMSI (Oral / Injeksi Insulin)</label>
+                    <textarea id="inputObat" rows="2" placeholder="Contoh: Metformin 2x500mg (Oral), Lantus Insulin 10 IU malam (Injeksi)" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-medical-500 focus:outline-none"></textarea>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex justify-end space-x-3 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="closeModalForm()" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition">Batal</button>
+                    <button type="submit" class="px-5 py-2 text-xs font-medium bg-medical-600 hover:bg-medical-700 text-white rounded-lg shadow-sm transition">Simpan Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Pasang di HP -->
+    <div id="installModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 overflow-y-auto no-print" onclick="if(event.target===this)closeInstall()">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden my-8">
+            <div class="bg-slate-900 text-white p-4 flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-smartphone text-medical-500 text-xl"></i>
+                    <h3 class="font-bold text-lg">Pasang di HP Anda</h3>
+                </div>
+                <button onclick="closeInstall()" class="text-slate-400 hover:text-white transition" aria-label="Tutup">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <div class="p-4 space-y-4 text-sm text-slate-700">
+                <p class="text-xs text-slate-500">Aplikasi bisa dipasang di HP masing-masing pasien. Data hasil lab tersimpan di HP itu sendiri dan tidak dibagikan ke pasien lain.</p>
+                <button id="installNowBtn" onclick="installNow()" class="hidden w-full bg-medical-600 hover:bg-medical-700 text-white px-4 py-3 rounded-lg font-medium flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-download"></i><span>Pasang Sekarang</span>
+                </button>
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-3">
+                    <p class="font-semibold mb-1">Android (Chrome)</p>
+                    <ol class="list-decimal pl-5 text-xs space-y-1">
+                        <li>Buka tautan aplikasi ini di Chrome.</li>
+                        <li>Ketuk menu <b>&#8942;</b> di pojok kanan atas.</li>
+                        <li>Pilih <b>Instal aplikasi</b> atau <b>Tambahkan ke layar utama</b>.</li>
+                    </ol>
+                </div>
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-3">
+                    <p class="font-semibold mb-1">iPhone (Safari)</p>
+                    <ol class="list-decimal pl-5 text-xs space-y-1">
+                        <li>Buka tautan aplikasi ini di Safari.</li>
+                        <li>Ketuk tombol <b>Bagikan</b>.</li>
+                        <li>Pilih <b>Tambah ke Layar Utama</b>.</li>
+                    </ol>
+                </div>
+                <div class="border-t border-slate-200 pt-3">
+                    <p class="text-xs text-slate-500 mb-2">Atau unduh file aplikasi (.html) lalu buka lewat Chrome. Butuh internet saat dibuka.</p>
+                    <button onclick="downloadApp()" class="w-full bg-slate-100 border border-slate-200 text-slate-700 px-4 py-2 rounded-lg text-xs font-medium flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-file-medical"></i><span>Unduh File Aplikasi</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Hapus Semua Data -->
+    <div id="deleteAllModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print" onclick="if(event.target===this)closeDeleteAll()">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden">
+            <div class="p-5 text-center">
+                <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-3 text-xl">
+                    <i class="fa-solid fa-trash-can"></i>
+                </div>
+                <h3 class="font-bold text-slate-900 text-lg">Hapus semua data?</h3>
+                <p id="deleteAllInfo" class="text-sm text-slate-600 mt-1"></p>
+                <p class="text-xs text-slate-500 mt-1">Semua riwayat pemeriksaan akan terhapus dan Anda mulai dari awal. Data tidak dapat dikembalikan.</p>
+            </div>
+            <div class="flex border-t border-slate-200">
+                <button onclick="closeDeleteAll()" class="flex-1 py-3 text-sm font-medium text-slate-600 hover:bg-slate-50 transition">Batal</button>
+                <button onclick="confirmDeleteAll()" class="flex-1 py-3 text-sm font-bold text-rose-600 hover:bg-rose-50 transition border-l border-slate-200">Hapus Semua</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Hapus -->
+    <div id="deleteModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print" onclick="if(event.target===this)closeDelete()">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden">
+            <div class="p-5 text-center">
+                <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-3 text-xl">
+                    <i class="fa-solid fa-trash-can"></i>
+                </div>
+                <h3 class="font-bold text-slate-900 text-lg">Hapus data pemeriksaan?</h3>
+                <p id="deleteInfo" class="text-sm text-slate-600 mt-1"></p>
+                <p class="text-xs text-slate-500 mt-1">Data yang dihapus tidak dapat dikembalikan.</p>
+            </div>
+            <div class="flex border-t border-slate-200">
+                <button onclick="closeDelete()" class="flex-1 py-3 text-sm font-medium text-slate-600 hover:bg-slate-50 transition">Batal</button>
+                <button onclick="confirmDelete()" class="flex-1 py-3 text-sm font-bold text-rose-600 hover:bg-rose-50 transition border-l border-slate-200">Hapus</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal WhatsApp -->
+    <div id="waModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 overflow-y-auto no-print" onclick="if(event.target===this)closeWA()">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden my-8">
+            <div class="bg-slate-900 text-white p-4 flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-brands fa-whatsapp text-green-400 text-xl"></i>
+                    <h3 class="font-bold text-lg">Kirim ke WhatsApp</h3>
+                </div>
+                <button onclick="closeWA()" class="text-slate-400 hover:text-white transition" aria-label="Tutup">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <div class="p-4 space-y-3">
+                <p class="text-xs text-slate-500">Pratinjau pesan (data pemeriksaan terbaru):</p>
+                <pre id="waPreview" class="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-700 whitespace-pre-wrap max-h-64 overflow-y-auto"></pre>
+                <a id="waLink" href="#" target="_blank" rel="noopener noreferrer" class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg text-sm font-medium flex items-center justify-center space-x-2">
+                    <i class="fa-brands fa-whatsapp text-lg"></i><span>Buka WhatsApp</span>
+                </a>
+                <button onclick="copyWA()" class="w-full bg-slate-100 border border-slate-200 text-slate-700 px-4 py-2 rounded-lg text-xs font-medium">Salin Pesan</button>
+                <p class="text-[11px] text-slate-500">Jika WhatsApp tidak terbuka, salin pesan lalu tempel di WhatsApp secara manual.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center space-x-3 text-xs no-print">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
+        <span id="toastMsg">Pesan Notifikasi</span>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script data-keep>
+
+        // ===== Mode Gelap / Terang =====
+        function applyTheme(t) {
+            document.documentElement.classList.toggle('dark', t === 'dark');
+            var l = document.getElementById('themeLabel');
+            if (l) l.textContent = t === 'dark' ? 'Terang' : 'Gelap';
+        }
+        function toggleTheme() {
+            var t = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+            applyTheme(t);
+            try { localStorage.setItem('medi_theme', t); } catch (e) {}
+        }
+
+        // ===== Ikon SVG (pengganti FontAwesome) =====
+        var P = {
+            'heart-pulse': '<path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7Z"/><path d="M3.2 12h6.3l.5-1 2 4.5 2-7 1.5 3.5h5.3"/>',
+            'plus': '<path d="M12 5v14M5 12h14"/>',
+            'download': '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>',
+            'smartphone': '<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/>',
+            'user-doctor': '<path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6 6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a6 6 0 0 0 6 6 6 6 0 0 0 6-6v-4"/><circle cx="20" cy="10" r="2"/>',
+            'magnifying-glass': '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+            'xmark': '<path d="M18 6 6 18M6 6l12 12"/>',
+            'file-pdf': '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>',
+            'file-excel': '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8M12 13v8"/>',
+            'whatsapp': '<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>',
+            'notes-medical': '<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2M12 11v6M9 14h6"/>',
+            'file-medical': '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M12 18v-6M9 15h6"/>',
+            'pen-to-square': '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+            'trash-can': '<path d="M3 6h18M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/>',
+            'circle-check': '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
+            'sun': '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+            'moon': '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>'
+        };
+        function swapIcons(root) {
+            (root || document).querySelectorAll('i[class*="fa-"]').forEach(function (el) {
+                var cls = el.className.split(/\s+/), name = null, keep = [];
+                cls.forEach(function (c) {
+                    if (c === 'fa-solid' || c === 'fa-brands') return;
+                    if (c.indexOf('fa-') === 0 && P[c.slice(3)]) name = c.slice(3); else keep.push(c);
+                });
+                if (!name) return;
+                var s = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                s.setAttribute('viewBox', '0 0 24 24');
+                s.setAttribute('fill', 'none');
+                s.setAttribute('stroke', 'currentColor');
+                s.setAttribute('stroke-width', '2');
+                s.setAttribute('stroke-linecap', 'round');
+                s.setAttribute('stroke-linejoin', 'round');
+                s.setAttribute('class', keep.join(' '));
+                s.setAttribute('style', 'width:1em;height:1em;display:inline-block;vertical-align:-0.125em;flex-shrink:0');
+                if (el.id) s.id = el.id;
+                s.innerHTML = P[name];
+                el.replaceWith(s);
+            });
+        }
+        swapIcons();
+        new MutationObserver(function () { swapIcons(); }).observe(document.body, { childList: true, subtree: true });
+        applyTheme(document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+
+        // ===== Pasang di HP =====
+        var deferredInstall = null;
+        (function () {
+            try {
+                var icon = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="40" fill="#0284c7"/><path d="M96 150 54 108a28 28 0 0 1 42-37 28 28 0 0 1 42 37Z" fill="#fff"/></svg>');
+                var manifest = { name: 'Internis Care', short_name: 'Internis Care', start_url: location.href.split('#')[0], display: 'standalone', background_color: '#0b1220', theme_color: '#0284c7', lang: 'id', icons: [{ src: icon, sizes: '192x192 512x512', type: 'image/svg+xml', purpose: 'any' }] };
+                var l = document.createElement('link');
+                l.rel = 'manifest';
+                l.href = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' }));
+                document.head.appendChild(l);
+                var a = document.createElement('link');
+                a.rel = 'apple-touch-icon';
+                a.href = icon;
+                document.head.appendChild(a);
+            } catch (e) {}
+            var standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone;
+            if (standalone) { var b = document.getElementById('installBtn'); if (b) b.classList.add('hidden'); }
+        })();
+        window.addEventListener('beforeinstallprompt', function (e) {
+            e.preventDefault();
+            deferredInstall = e;
+        });
+        window.addEventListener('appinstalled', function () {
+            deferredInstall = null;
+            closeInstall();
+            showToast('Aplikasi berhasil dipasang di HP!');
+        });
+        function openInstall() {
+            document.getElementById('installNowBtn').classList.toggle('hidden', !deferredInstall);
+            document.getElementById('installModal').classList.remove('hidden');
+        }
+        function closeInstall() {
+            document.getElementById('installModal').classList.add('hidden');
+        }
+        function installNow() {
+            if (!deferredInstall) return;
+            deferredInstall.prompt();
+            deferredInstall.userChoice.finally(function () { deferredInstall = null; closeInstall(); });
+        }
+        async function downloadApp() {
+            var dl = null;
+            try { dl = window.claude ? await window.claude.use('downloads') : null; } catch (e) {}
+            if (!dl) { showToast('Unduh file tidak tersedia di sini. Gunakan langkah Tambahkan ke layar utama.'); return; }
+            var c = document.documentElement.cloneNode(true);
+            c.querySelectorAll('style:not([data-keep]), script:not([data-keep]):not([src]), link[rel="manifest"], link[rel="apple-touch-icon"]').forEach(function (n) { n.remove(); });
+            var tb = c.querySelector('#tableBody'); if (tb) tb.innerHTML = '';
+            ['modalForm', 'installModal'].forEach(function (id) { var m = c.querySelector('#' + id); if (m) m.classList.add('hidden'); });
+            try {
+                await dl.save({ filename: 'Internis_Care.html', data: '<!DOCTYPE html>\n' + c.outerHTML });
+                showToast('File aplikasi berhasil diunduh!');
+            } catch (err) {
+                if (!err || err.code !== 'declined') showToast('File tidak dapat diunduh.');
+            }
+        }
+
+        // State Management
+        let patientRecords = JSON.parse(localStorage.getItem('medi_patient_records')) || [];
+
+        // Standar Medis Nilai Normal
+        const MEDICAL_RANGES = {
+            gdp: { min: 70, max: 100, warnMax: 125 }, // > 125 diabetes
+            gd2jam: { max: 140, warnMax: 199 },
+            gdacak: { max: 140, warnMax: 199 },
+            hba1c: { max: 5.6, warnMax: 6.4 }, // <5.7 Normal, 5.7-6.4 Prediabetes, >=6.5 Diabetes
+            kolesterol: { max: 200, warnMax: 239 },
+            ldl: { max: 100, warnMax: 129 },
+            tg: { max: 150, warnMax: 199 },
+            asamUrat: { min: 3.5, max: 7.0 },
+            bun: { min: 7, max: 20 },
+            kreatinin: { min: 0.6, max: 1.2 }
+        };
+
+        // Initialize App
+        window.onload = function() {
+            // Set Default Date to Today
+            document.getElementById('inputTgl').valueAsDate = new Date();
+            renderTable();
+        };
+
+        // Save / Update Data
+        function saveData(e) {
+            e.preventDefault();
+            
+            const index = parseInt(document.getElementById('editIndex').value);
+            const record = {
+                id: index >= 0 ? patientRecords[index].id : Date.now(),
+                nama: document.getElementById('inputNama').value.trim() || 'Pasien Anonim',
+                infoPasien: document.getElementById('inputInfoPasien').value.trim(),
+                tgl: document.getElementById('inputTgl').value,
+                gdp: parseVal(document.getElementById('inputGDP').value),
+                gd2jam: parseVal(document.getElementById('inputGD2JAMPP').value),
+                gdacak: parseVal(document.getElementById('inputGDAcak').value),
+                hba1c: parseVal(document.getElementById('inputHbA1c').value),
+                kolesterol: parseVal(document.getElementById('inputKolesterol').value),
+                ldl: parseVal(document.getElementById('inputLDL').value),
+                tg: parseVal(document.getElementById('inputTG').value),
+                asamUrat: parseVal(document.getElementById('inputAsamUrat').value),
+                bun: parseVal(document.getElementById('inputBUN').value),
+                kreatinin: parseVal(document.getElementById('inputKreatinin').value),
+                obat: document.getElementById('inputObat').value.trim() || '-'
+            };
+
+            if (index >= 0) {
+                patientRecords[index] = record;
+                showToast("Data pemeriksaan berhasil diperbarui!");
+            } else {
+                patientRecords.unshift(record); // Add to beginning
+                showToast("Data pemeriksaan baru berhasil disimpan!");
+            }
+
+            saveToLocalStorage();
+            renderTable();
+            closeModalForm();
+        }
+
+        function parseVal(val) {
+            return val !== "" && !isNaN(val) ? parseFloat(val) : null;
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem('medi_patient_records', JSON.stringify(patientRecords));
+        }
+
+        // Render Table Rows & Evaluate Medical Status
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            const emptyState = document.getElementById('emptyState');
+            const filterNamaVal = document.getElementById('filterNama').value.toLowerCase();
+            const filterTglVal = document.getElementById('filterTanggal').value;
+
+            tbody.innerHTML = '';
+
+            const filteredData = patientRecords.filter(item => {
+                const matchNama = item.nama.toLowerCase().includes(filterNamaVal);
+                const matchTgl = !filterTglVal || item.tgl === filterTglVal;
+                return matchNama && matchTgl;
+            });
+
+            if (filteredData.length === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            let totalNormalCount = 0;
+            let totalWarningCount = 0;
+            let totalHighCount = 0;
+
+            filteredData.forEach((item, idx) => {
+                const row = document.createElement('tr');
+                row.className = "hover:bg-slate-50 transition border-b border-slate-100";
+
+                // Formatter Badge
+                const gdpBadge = getStatusBadge(item.gdp, MEDICAL_RANGES.gdp);
+                const gd2jamBadge = getStatusBadge(item.gd2jam, MEDICAL_RANGES.gd2jam);
+                const gdacakBadge = getStatusBadge(item.gdacak, MEDICAL_RANGES.gdacak);
+                const hba1cBadge = getStatusBadge(item.hba1c, MEDICAL_RANGES.hba1c, '%');
+                const kolBadge = getStatusBadge(item.kolesterol, MEDICAL_RANGES.kolesterol);
+                const ldlBadge = getStatusBadge(item.ldl, MEDICAL_RANGES.ldl);
+                const tgBadge = getStatusBadge(item.tg, MEDICAL_RANGES.tg);
+                const asamUratBadge = getStatusBadge(item.asamUrat, MEDICAL_RANGES.asamUrat);
+                const bunBadge = getStatusBadge(item.bun, MEDICAL_RANGES.bun);
+                const kreatininBadge = getStatusBadge(item.kreatinin, MEDICAL_RANGES.kreatinin);
+
+                // Collect Badges Status for Summary Stats
+                const statuses = [gdpBadge.type, gd2jamBadge.type, gdacakBadge.type, hba1cBadge.type, kolBadge.type, ldlBadge.type, tgBadge.type, asamUratBadge.type, bunBadge.type, kreatininBadge.type];
+                if (statuses.includes('high')) totalHighCount++;
+                else if (statuses.includes('warn')) totalWarningCount++;
+                else totalNormalCount++;
+
+                const formatTgl = formatDateIndo(item.tgl);
+
+                row.innerHTML = `
+                    <td class="p-3 text-center font-medium text-slate-500">${idx + 1}</td>
+                    <td class="p-3">
+                        <div class="font-bold text-slate-800">${escapeHtml(item.nama)}</div>
+                        <div class="text-[10px] text-slate-400">${formatTgl} ${item.infoPasien ? `• ${escapeHtml(item.infoPasien)}` : ''}</div>
+                    </td>
+                    <td class="p-3 text-center">${gdpBadge.html}</td>
+                    <td class="p-3 text-center">${gd2jamBadge.html}</td>
+                    <td class="p-3 text-center">${gdacakBadge.html}</td>
+                    <td class="p-3 text-center">${hba1cBadge.html}</td>
+                    <td class="p-3 text-center">${kolBadge.html}</td>
+                    <td class="p-3 text-center">${ldlBadge.html}</td>
+                    <td class="p-3 text-center">${tgBadge.html}</td>
+                    <td class="p-3 text-center">${asamUratBadge.html}</td>
+                    <td class="p-3 text-center">${bunBadge.html}</td>
+                    <td class="p-3 text-center">${kreatininBadge.html}</td>
+                    <td class="p-3">
+                        <div class="text-xs text-slate-700 whitespace-pre-line bg-slate-50 p-1.5 rounded border border-slate-100">${escapeHtml(item.obat)}</div>
+                    </td>
+                    <td class="p-3 text-center no-print">
+                        <div class="flex items-center justify-center space-x-1">
+                            <button onclick="editRecord(${patientRecords.indexOf(item)})" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition" title="Edit Data">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <button onclick="deleteRecord(${patientRecords.indexOf(item)})" class="p-1.5 text-rose-600 hover:bg-rose-50 rounded transition" title="Hapus Data">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // Update Header Stats
+            document.getElementById('statTotal').innerText = filteredData.length;
+            document.getElementById('statNormal').innerText = totalNormalCount;
+            document.getElementById('statWaspada').innerText = totalWarningCount;
+            document.getElementById('statTinggi').innerText = totalHighCount;
+        }
+
+        // Helper: Evaluasi Status Nilai Medis & Generate HTML Badge
+        function getStatusBadge(val, range, suffix = '') {
+            if (val === null || val === undefined) {
+                return { html: `<span class="text-slate-300">-</span>`, type: 'none' };
+            }
+
+            let colorClass = "bg-emerald-100 text-emerald-800 border-emerald-200"; // Normal
+            let statusType = "normal";
+
+            if (range.min !== undefined && val < range.min) {
+                colorClass = "bg-amber-100 text-amber-800 border-amber-200"; // Low/Warning
+                statusType = "warn";
+            } else if (range.warnMax && val > range.warnMax) {
+                colorClass = "bg-rose-100 text-rose-800 border-rose-200 font-bold"; // Critical High
+                statusType = "high";
+            } else if (range.max && val > range.max) {
+                if (range.warnMax) {
+                    colorClass = "bg-amber-100 text-amber-800 border-amber-200"; // Slight High
+                    statusType = "warn";
+                } else {
+                    colorClass = "bg-rose-100 text-rose-800 border-rose-200 font-bold"; // High
+                    statusType = "high";
+                }
+            }
+
+            const displayValue = suffix ? `${val}${suffix}` : val;
+
+            return {
+                html: `<span class="inline-block px-2 py-0.5 text-xs rounded-md border ${colorClass}">${displayValue}</span>`,
+                type: statusType
+            };
+        }
+
+        // Actions: Modal Open/Close & Edit
+        function openModalForm(isEdit = false) {
+            if (!isEdit) {
+                document.getElementById('labForm').reset();
+                document.getElementById('editIndex').value = "-1";
+                document.getElementById('modalTitle').innerText = "Input Data Pemeriksaan Pasien";
+                document.getElementById('inputTgl').valueAsDate = new Date();
+                
+                // Carry over nama pasien dari filter jika ada
+                const currentFilterNama = document.getElementById('filterNama').value;
+                if (currentFilterNama) {
+                    document.getElementById('inputNama').value = currentFilterNama;
+                }
+            }
+            document.getElementById('modalForm').classList.remove('hidden');
+        }
+
+        function closeModalForm() {
+            document.getElementById('modalForm').classList.add('hidden');
+        }
+
+        function editRecord(realIndex) {
+            const item = patientRecords[realIndex];
+            if (!item) return;
+
+            document.getElementById('editIndex').value = realIndex;
+            document.getElementById('modalTitle').innerText = "Edit Data Pemeriksaan Pasien";
+
+            document.getElementById('inputNama').value = item.nama || '';
+            document.getElementById('inputInfoPasien').value = item.infoPasien || '';
+            document.getElementById('inputTgl').value = item.tgl || '';
+            document.getElementById('inputGDP').value = item.gdp !== null ? item.gdp : '';
+            document.getElementById('inputGD2JAMPP').value = item.gd2jam !== null ? item.gd2jam : '';
+            document.getElementById('inputGDAcak').value = item.gdacak !== null ? item.gdacak : '';
+            document.getElementById('inputHbA1c').value = item.hba1c !== null ? item.hba1c : '';
+            document.getElementById('inputKolesterol').value = item.kolesterol !== null ? item.kolesterol : '';
+            document.getElementById('inputLDL').value = item.ldl !== null ? item.ldl : '';
+            document.getElementById('inputTG').value = item.tg !== null ? item.tg : '';
+            document.getElementById('inputAsamUrat').value = item.asamUrat !== null ? item.asamUrat : '';
+            document.getElementById('inputBUN').value = item.bun !== null ? item.bun : '';
+            document.getElementById('inputKreatinin').value = item.kreatinin !== null ? item.kreatinin : '';
+            document.getElementById('inputObat').value = item.obat || '';
+
+            openModalForm(true);
+        }
+
+        var pendingDelete = null;
+        function deleteRecord(realIndex) {
+            var item = patientRecords[realIndex];
+            if (!item) return;
+            pendingDelete = realIndex;
+            document.getElementById('deleteInfo').textContent = (item.nama || 'Pasien') + ' - ' + formatDateIndo(item.tgl);
+            document.getElementById('deleteModal').classList.remove('hidden');
+        }
+        function openDeleteAll() {
+            if (patientRecords.length === 0) {
+                showToast("Belum ada data untuk dihapus.");
+                return;
+            }
+            document.getElementById('deleteAllInfo').textContent = patientRecords.length + ' data pemeriksaan akan dihapus.';
+            document.getElementById('deleteAllModal').classList.remove('hidden');
+        }
+        function closeDeleteAll() {
+            document.getElementById('deleteAllModal').classList.add('hidden');
+        }
+        function confirmDeleteAll() {
+            patientRecords = [];
+            saveToLocalStorage();
+            document.getElementById('filterNama').value = '';
+            document.getElementById('filterTanggal').value = '';
+            renderTable();
+            closeDeleteAll();
+            showToast("Semua data telah dihapus. Silakan mulai dari awal.");
+        }
+        function closeDelete() {
+            pendingDelete = null;
+            document.getElementById('deleteModal').classList.add('hidden');
+        }
+        function confirmDelete() {
+            if (pendingDelete !== null && patientRecords[pendingDelete]) {
+                patientRecords.splice(pendingDelete, 1);
+                saveToLocalStorage();
+                renderTable();
+                showToast("Data telah berhasil dihapus.");
+            }
+            closeDelete();
+        }
+
+        function filterData() {
+            renderTable();
+        }
+
+        function resetFilter() {
+            document.getElementById('filterNama').value = '';
+            document.getElementById('filterTanggal').value = '';
+            renderTable();
+        }
+
+        // Export PDF
+        async function exportPDF() {
+            if (patientRecords.length === 0) {
+                showToast("Belum ada data untuk dicetak!");
+                return;
+            }
+            if (typeof html2pdf === 'undefined') {
+                showToast("Pustaka PDF belum termuat. Periksa koneksi internet.");
+                return;
+            }
+            document.getElementById('printDate').innerText = new Date().toLocaleDateString('id-ID', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+            });
+
+            const element = document.getElementById('printArea');
+            const filename = `Laporan_Kesehatan_Pasien_${new Date().toISOString().slice(0,10)}.pdf`;
+            const opt = {
+                margin:       0.3,
+                filename:     filename,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'in', format: 'a4', orientation: 'landscape' }
+            };
+
+            showToast("Memproses dokumen PDF...");
+            const wasDark = document.documentElement.classList.contains('dark');
+            document.documentElement.classList.remove('dark'); // PDF selalu tampil terang
+            try {
+                let dl = null;
+                try { dl = window.claude ? await window.claude.use('downloads') : null; } catch (e) {}
+                if (dl) {
+                    const blob = await html2pdf().set(opt).from(element).outputPdf('blob');
+                    await dl.save({ filename: filename, data: blob });
+                    showToast("PDF siap disimpan!");
+                } else {
+                    await html2pdf().set(opt).from(element).save();
+                    showToast("PDF Berhasil diunduh!");
+                }
+            } catch (err) {
+                if (!err || err.code !== 'declined') showToast("PDF gagal dibuat. Coba lagi.");
+            } finally {
+                if (wasDark) document.documentElement.classList.add('dark');
+            }
+        }
+
+        // Send Report to WhatsApp
+        function kirimWhatsApp() {
+            if (patientRecords.length === 0) {
+                showToast("Belum ada data riwayat untuk dikirim!");
+                return;
+            }
+
+            // Ambil data paling terbaru
+            const latest = patientRecords[0];
+            
+            let text = `*LAPORAN PEMANTAUAN KESEHATAN PASIEN*\n`;
+            text += `----------------------------------------\n`;
+            text += `*Nama Pasien:* ${latest.nama}\n`;
+            if (latest.infoPasien) text += `*Info Pasien:* ${latest.infoPasien}\n`;
+            text += `*Tanggal Periksa:* ${formatDateIndo(latest.tgl)}\n\n`;
+            text += `*HASIL LABORATORIUM:* \n`;
+            if (latest.gdp !== null) text += `• GDP: ${latest.gdp} mg/dL\n`;
+            if (latest.gd2jam !== null) text += `• GD 2 Jam PP: ${latest.gd2jam} mg/dL\n`;
+            if (latest.gdacak !== null) text += `• GD Acak: ${latest.gdacak} mg/dL\n`;
+            if (latest.hba1c !== null) text += `• HbA1c: ${latest.hba1c} %\n`;
+            if (latest.kolesterol !== null) text += `• Kolesterol Total: ${latest.kolesterol} mg/dL\n`;
+            if (latest.ldl !== null) text += `• LDL: ${latest.ldl} mg/dL\n`;
+            if (latest.tg !== null) text += `• Trigliserida (TG): ${latest.tg} mg/dL\n`;
+            if (latest.asamUrat !== null) text += `• Asam Urat: ${latest.asamUrat} mg/dL\n`;
+            if (latest.bun !== null) text += `• BUN: ${latest.bun} mg/dL\n`;
+            if (latest.kreatinin !== null) text += `• Serum Kreatinin: ${latest.kreatinin} mg/dL\n`;
+            text += `\n*OBAT YANG DIKONSUMSI:*\n${latest.obat}\n`;
+            text += `----------------------------------------\n`;
+            text += `_Dikirim melalui Internis Care_`;
+
+            document.getElementById('waPreview').textContent = text;
+            document.getElementById('waLink').href = 'https://wa.me/?text=' + encodeURIComponent(text);
+            document.getElementById('waModal').classList.remove('hidden');
+        }
+        function closeWA() {
+            document.getElementById('waModal').classList.add('hidden');
+        }
+        async function copyWA() {
+            const text = document.getElementById('waPreview').textContent;
+            let ok = false;
+            try { await navigator.clipboard.writeText(text); ok = true; } catch (e) {}
+            if (!ok) {
+                try {
+                    const ta = document.createElement('textarea');
+                    ta.value = text;
+                    ta.style.position = 'fixed';
+                    ta.style.opacity = '0';
+                    document.body.appendChild(ta);
+                    ta.select();
+                    ok = document.execCommand('copy');
+                    document.body.removeChild(ta);
+                } catch (e) {}
+            }
+            showToast(ok ? "Pesan disalin. Tempel di WhatsApp." : "Gagal menyalin. Tekan lama teks untuk menyalin.");
+        }
+
+        // Helpers
+        function formatDateIndo(dateStr) {
+            if (!dateStr) return '-';
+            const parts = dateStr.split('-');
+            if (parts.length !== 3) return dateStr;
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = message;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
